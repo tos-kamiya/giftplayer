@@ -1,16 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import os.path as path
 import random
 import re
 
-import click
 from flask import Flask, request
 
-from .gift_ast import gift_parse
-from .gift_html_form import html_escape_node_body_strs, gift_build_form_content
-from .gift_html_form_answer import gift_build_quiz_answer
+from .ast import gift_parse
+from .html_form import html_escape_node_body_strs, gift_build_form_content
+from .html_form_answer import gift_build_quiz_answer
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
 
@@ -195,10 +191,7 @@ def submit_answer():
     return '\n'.join(buf)
 
 
-@click.command()
-@click.argument('gift_script', default='')
-@click.option('--shuffle', '-s', help='Seed of shuffling choices of each question', default=-1)
-def main(gift_script, shuffle):
+def entrypoint(gift_script, shuffle):
     if shuffle >= 0:
         random.seed(shuffle)
         shuffle_func = random.shuffle
@@ -228,7 +221,3 @@ def main(gift_script, shuffle):
     ANSWER_TABLE.append(answer)
 
     app.run(debug=True)
-
-
-if __name__ == '__main__':
-    main()

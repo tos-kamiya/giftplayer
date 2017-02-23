@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from .gift_ast import gift_parse, Node, GiftSyntaxError
+from .ast import gift_parse, Node, GiftSyntaxError
 
 
 def gift_build_quiz_answer_i_quiz_node(node, quiz_num):

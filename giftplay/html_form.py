@@ -1,14 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import html
 import os.path as path
 import random
 
-import click
-
-from .gift_ast import gift_parse, Node, GiftSyntaxError
-from .gift_html_form_answer import gift_build_quiz_answer
+from .ast import gift_parse, Node, GiftSyntaxError
+from .html_form_answer import gift_build_quiz_answer
 
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
@@ -166,11 +161,7 @@ def html_escape_node_body_strs(node):
         assert False
 
 
-@click.command()
-@click.argument('gift_script', default='')
-@click.option('--answer', '-a', help='Print answers of questions', is_flag=True)
-@click.option('--shuffle', '-s', help='Seed of shuffling choices of each question', default=-1)
-def main(gift_script, answer, shuffle):
+def entrypoint(gift_script, answer, shuffle):
     if shuffle >= 0:
         random.seed(shuffle)
         shuffle_func = random.shuffle
@@ -199,7 +190,3 @@ def main(gift_script, answer, shuffle):
         html = gift_build_form_content(ast, shuffle_func)
         html = HEAD + html + FOOT
         print(html)
-
-
-if __name__ == '__main__':
-    main()
