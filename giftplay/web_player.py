@@ -18,6 +18,12 @@ CSS = """
 * {
   font-family: sans-serif;
 }
+button.submit {
+  padding: 5px 20px;
+  background-color: #248;
+  color: #fff;
+  border-style: none;
+}
 </style>
 """
 
@@ -41,7 +47,8 @@ HEAD = """
 
 FOOT = """
 <br />
-<input type="submit" value="Send" />
+<br />
+<button class="submit" type=submit">Send</button>
 </form>
 </body>
 </html>
