@@ -4,9 +4,17 @@ Gift format is a text format for quiz [document](https://docs.moodle.org/23/en/G
 
 `giftpalayer` is a quick checking tool for quiz written in Gift format.
 
+Usage 1: Generate a HTML documnet for a given Gift quiz.
+
 ```sh
 $ cat q.gift
 ::Q1:: Two times three equals {=six =6}.
+$ python3 giftplayer_run.py html | bcat
+```
+
+Usage 2: Run a web server for a given gift quiz.
+
+```sh
 $ python3 giftplayer_run.py web q.gift
 ```
 
