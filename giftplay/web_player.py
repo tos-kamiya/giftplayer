@@ -24,6 +24,14 @@ button.submit {
   color: #fff;
   border-style: none;
 }
+table.score {
+  border-collapse: collapse;
+  border: 2px solid #333;
+}
+table.score td, table.score th {
+  border-collapse: collapse;
+  border: 1px solid #333;
+}
 </style>
 """
 
@@ -97,8 +105,9 @@ def parse_form_content(form_content):
     answer_tbl = {}  # 'quiz%d' -> str or [(left, right)] or [str]
     keys = form_content.keys()
     for k in keys:
-        m = pat_match_left.match(k)
-        if m:
+        m = pat_match_left.match(k) or pat_match_right.match(k) or \
+                pat_multiple_choice.match(k) or pat_quiz.match(k)
+        if m.re is pat_match_left:
             key = int(m.group(1))
             lst = answer_tbl.setdefault(key, [])
             idx = int(m.group(2)) - 1
@@ -106,9 +115,7 @@ def parse_form_content(form_content):
             extend_if_needed(lst, idx)
             item = lst[idx]
             lst[idx] = (form_content.get(k), item[1])
-            continue  # for k
-        m = pat_match_right.match(k)
-        if m:
+        elif m.re is pat_match_right:
             key = int(m.group(1))
             lst = answer_tbl.setdefault(key, [])
             idx = int(m.group(2)) - 1
@@ -116,18 +123,13 @@ def parse_form_content(form_content):
             extend_if_needed(lst, idx)
             item = lst[idx]
             lst[idx] = (item[0], form_content.get(k))
-            continue  # for k
-        m = pat_multiple_choice.match(k)
-        if m:
+        elif m.re is pat_multiple_choice:
             key = int(m.group(1))
             lst = answer_tbl.setdefault(key, [])
             lst.append(form_content.get(k))
-            continue  # for k
-        m = pat_quiz.match(k)
-        if m:
+        elif m.re is pat_quiz:
             key = int(m.group(1))
             answer_tbl[key] = form_content.get(k)
-            continue  # for k
     return answer_tbl
 
 
@@ -139,7 +141,7 @@ def score_submission(submission, anwser_table):
     for k, an in sorted(anwser_table.items()):
         s = submission.get(k)
         if not s:
-            score_table[k] = '-'
+            score_table[k] = None
         else:
             if an.mark == '{}':
                 score_table[k] = 'filled'
@@ -156,21 +158,19 @@ def score_submission(submission, anwser_table):
                 try:
                     submitted_value = float(s)
                     correct_str = an.body[0]
-                    m = pat_math_ans_range.match(correct_str)
-                    if m:
+                    m = pat_math_ans_range.match(correct_str) or pat_math_ans_wo_error.match(correct_str) or \
+                            pat_math_ans_with_error.match(correct_str)
+                    if m.re is pat_math_ans_range:
                         range_min, range_max = float(m.group(1)), float(m.group(3))
                         score_table[k] = range_min <= submitted_value <= range_max
-                    else:
-                        m = pat_math_ans_wo_error.match(correct_str)
-                        if m:
-                            val, err = float(m.group(1)), 0.0
-                        else:
-                            m = pat_math_ans_with_error.match(correct_str)
-                            if m:
-                                val, err = float(m.group(1)), float(m.group(3))
-                            else:
-                                assert False
+                    elif m.re is pat_math_ans_wo_error:
+                        val = float(m.group(1))
+                        score_table[k] = submitted_value == val
+                    elif m.re is pat_math_ans_with_error:
+                        val, err = float(m.group(1)), float(m.group(3))
                         score_table[k] = val - err <= submitted_value <= val + err
+                    else:
+                        assert False
                 except ValueError:
                     score_table[k] = 'invalid as number'
 
@@ -187,15 +187,14 @@ def submit_answer():
     fc = parse_form_content(request.form)
     score_table = score_submission(fc, answer_table)
 
-    buf = ['<table border="1">', '<tr><th>question</th><th>submitted</th><th>result</th></tr>']
+    buf = ['<table class="score">', '<tr><th>question</th><th>submitted</th><th>result</th></tr>']
     for k in quiz_keys:
         submitted = fc.get(k, '')
-        if submitted:
-            score = score_table.get(k)
-            buf.append('<tr><td>%s</td><td>%s</td><td>%s</td></tr>' % (k, submitted, repr(score)))
+        score = score_table.get(k)
+        buf.append('<tr><td>%s</td><td>%s</td><td>%s</td></tr>' % (k, submitted, repr(score)))
     buf.append('</table>')
 
-    return '\n'.join(buf)
+    return '\n'.join([HEAD_ANS] + buf + [FOOT_ANS])
 
 
 def entrypoint(gift_script, shuffle):
