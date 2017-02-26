@@ -1,4 +1,11 @@
-from .ast import gift_parse, Node, GiftSyntaxError
+import unicodedata
+from .ast import Node
+
+
+def str_normalize(s):
+    if s is None:
+        return None
+    return unicodedata.normalize('NFKC', s.strip())
 
 
 def gift_build_quiz_answer_i_quiz_node(node, quiz_num):
@@ -6,13 +13,13 @@ def gift_build_quiz_answer_i_quiz_node(node, quiz_num):
         r = Node(node.mark, [])
         for cn in node.body:
             if cn.mark == '=':
-                r.body.append(cn.body[0])
+                r.body.append(str_normalize(cn.body[0]))
         return r
     elif node.mark == '{%}':
         r = Node(node.mark, [])
         for cn in node.body:
             if cn.mark == '%+':
-                r.body.append(cn.body[0])
+                r.body.append(str_normalize(cn.body[0]))
         return r
     elif node.mark == '{}':
         r = Node(node.mark, [])
@@ -21,11 +28,11 @@ def gift_build_quiz_answer_i_quiz_node(node, quiz_num):
         r = Node(node.mark, [])
         for cn in node.body:
             if cn.mark == '=':
-                r.body.append(cn.body[0])
+                r.body.append(str_normalize(cn.body[0]))
         return r
     elif node.mark in ('{#}'):
         assert len(node.body) == 1 and isinstance(node.body[0], str)
-        r = Node(node.mark, [node.body[0]])
+        r = Node(node.mark, [str_normalize(node.body[0])])
         return r
     elif node.mark == '{T}':
         assert len(node.body) == 1 and node.body[0] in ('true', 'false')
@@ -35,10 +42,10 @@ def gift_build_quiz_answer_i_quiz_node(node, quiz_num):
         r = Node(node.mark, [])
         for cn in node.body:
             if cn.mark == '=':
-                r.body.append((cn.body[0], None))
+                r.body.append((str_normalize(cn.body[0]), None))
             elif cn.mark == '->':
                 assert r.body and r.body[-1][1] == None
-                r.body[-1] = (r.body[-1][0], cn.body[0])
+                r.body[-1] = (r.body[-1][0], str_normalize(cn.body[0]))
         return r
     else:
         assert False

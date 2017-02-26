@@ -7,7 +7,7 @@ from flask import Flask, request
 
 from .ast import gift_parse
 from .html_form import html_escape_node_body_strs, gift_build_form_content
-from .html_form_answer import gift_build_quiz_answer
+from .html_form_answer import gift_build_quiz_answer, str_normalize
 
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
@@ -139,7 +139,7 @@ def parse_form_content(form_content):
             assert 0 <= idx < 999
             extend_if_needed(lst, idx)
             item = lst[idx]
-            lst[idx] = (form_content.get(k), item[1])
+            lst[idx] = (str_normalize(form_content.get(k)), str_normalize(item[1]))
         elif m.re is pat_match_right:
             key = int(m.group(1))
             lst = answer_tbl.setdefault(key, [])
@@ -147,14 +147,14 @@ def parse_form_content(form_content):
             assert 0 <= idx < 999
             extend_if_needed(lst, idx)
             item = lst[idx]
-            lst[idx] = (item[0], form_content.get(k))
+            lst[idx] = (str_normalize(item[0]), str_normalize(form_content.get(k)))
         elif m.re is pat_multiple_choice:
             key = int(m.group(1))
             lst = answer_tbl.setdefault(key, [])
-            lst.append(form_content.get(k))
+            lst.append(str_normalize(form_content.get(k)))
         elif m.re is pat_quiz:
             key = int(m.group(1))
-            answer_tbl[key] = form_content.get(k)
+            answer_tbl[key] = str_normalize(form_content.get(k))
     return answer_tbl
 
 
@@ -173,8 +173,7 @@ def score_submission(submission, anwser_table):
             elif an.mark in ('{T}', '{~}'):
                 score_table[k] = s == an.body[0]
             elif an.mark == '{=}':
-                s = s.strip()
-                score_table[k] = any(s == correct_str.strip() for correct_str in an.body)
+                score_table[k] = any(s == correct_str for correct_str in an.body)
             elif an.mark == '{%}':
                 score_table[k] = set(s) == set(an.body)
             elif an.mark == '{->}':
