@@ -3,7 +3,6 @@ import random
 import re
 
 from flask import Flask, request
-from flask import g as FLASK_G
 
 from .ast import gift_parse
 from .html_form import html_escape_node_body_strs, gift_build_form_content
@@ -98,11 +97,7 @@ def read_quiz_script(gift_script):
     if not lines:
         lines = SAMPLE_GIFT_SCRIPT.split('\n')
 
-    # for token, linenum in gift_split(lines):
-    #     print("%d: %s" % (linenum, token))
-
-    ast = gift_parse(lines)
-    ast = html_escape_node_body_strs(ast)
+    ast = gift_parse(lines, merge_empty_line=False)
     # print(ast)
 
     return ast
@@ -111,6 +106,7 @@ def read_quiz_script(gift_script):
 @app.route('/', methods=['GET'])
 def quiz():
     ast = read_quiz_script(GIFT_SCRIPT[0])
+    ast = html_escape_node_body_strs(ast)
     html = gift_build_form_content(ast, SHUFFLE_FUNC[0])
     html = HEAD + html + FOOT
     return html

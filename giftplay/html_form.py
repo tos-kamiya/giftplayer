@@ -1,5 +1,6 @@
 import html
 import os.path as path
+import sys
 import random
 
 from .ast import gift_parse, Node, GiftSyntaxError
@@ -144,6 +145,7 @@ def gift_build_form_content(ast, shuffle_func=None):
             buf.extend(gift_build_html_i_quiz_node(cn, quiz_num, shuffle_func))
         else:
             raise GiftSyntaxError("invalid node mark: %s" % cn.mark)
+    # sys.stderr.write("buf=%s\n" % repr(buf))  # debug
     return '\n'.join(buf)
 
 
@@ -156,6 +158,8 @@ def html_escape_node_body_strs(node):
         return n
     elif isinstance(node, str):
         s = node.strip()
+        if s == '':
+            return '<br />'
         return html.escape(s)
     else:
         assert False
@@ -179,7 +183,7 @@ def entrypoint(gift_script, answer, shuffle):
     # for token, linenum in gift_split(lines):
     #     print("%d: %s" % (linenum, token))
 
-    ast = gift_parse(lines)
+    ast = gift_parse(lines, merge_empty_line=False)
     ast = html_escape_node_body_strs(ast)
     # print(ast)
 

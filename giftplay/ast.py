@@ -26,19 +26,23 @@ class GiftSyntaxError(Exception):
 def gift_split(lines):
     for li, L in enumerate(lines):
         linenum = li + 1
-        L = L.lstrip()
+        L = L.strip()
         if re.match(r'^//.*$', L):
             yield L, linenum  # comment line
         else:
             for t in re.split(r'((?<!\\)[(){}~=#])', L):
                 t = re.sub(r'\\([(){}~=#])', r'\1', t)
-                if t and not re.match(r'^\s+$', t):
-                    yield t, linenum
+                if re.match(r'^\s+$', t):
+                    t = ''
+                yield t, linenum
 
 
-def get_next(gift_split_it):
+def get_next(gift_split_it, skip_empty_str=False):
     try:
-        return next(gift_split_it)
+        s = next(gift_split_it)
+        while skip_empty_str and s[0] == '':
+            s = next(gift_split_it)
+        return s
     except StopIteration:
         return None, None
 
@@ -125,11 +129,14 @@ def convert_node_if_needed(node):
 
 
 def gift_parse_i_block(cur, ln, gift_it):
+    def get_next_w_skip(gift_it):
+        return get_next(gift_it, skip_empty_str=True)
+
     assert_token(cur, ln, '{')
-    cur, ln = get_next(gift_it)
+    cur, ln = get_next_w_skip(gift_it)
     if cur == '}':
         node = Node('{}', [])
-        cur, ln = get_next(gift_it)
+        cur, ln = get_next_w_skip(gift_it)
         return node, cur, ln
 
     if cur in ('T', 'True', 'F', 'False'):
@@ -138,25 +145,25 @@ def gift_parse_i_block(cur, ln, gift_it):
         elif cur == 'F':
             cur = 'false'
         node = Node('{T}', [cur])
-        cur, ln = get_next(gift_it)
+        cur, ln = get_next_w_skip(gift_it)
         assert_token(cur, ln, '}')
-        cur, ln = get_next(gift_it)
+        cur, ln = get_next_w_skip(gift_it)
         return node, cur, ln
 
     if cur == '#':
         node = Node('{#}', [])
-        cur, ln = get_next(gift_it)
+        cur, ln = get_next_w_skip(gift_it)
         node.body.append(cur)
-        cur, ln = get_next(gift_it)
+        cur, ln = get_next_w_skip(gift_it)
         if cur != '}':
             raise GiftSyntaxError("line %d: 'multiple numeric answers' not implemented yet" % (ln or 0))
-        cur, ln = get_next(gift_it)
+        cur, ln = get_next_w_skip(gift_it)
         return node, cur, ln
 
     node = Node('{~}', [])  # tentative
     while cur is not None:
         if cur == '}':
-            cur, ln = get_next(gift_it)
+            cur, ln = get_next_w_skip(gift_it)
             node = convert_node_if_needed(node)
             return node, cur, ln
         elif cur == '=':
@@ -168,34 +175,39 @@ def gift_parse_i_block(cur, ln, gift_it):
         elif cur == '#':
             cn, cur, ln = gift_parse_i_feedback_text(cur, ln, gift_it)
             node.body.append(cn)
+        elif cur == '':
+            # just skip the token
+            cur, ln = get_next_w_skip(gift_it)
         else:
             raise GiftSyntaxError("line %d: expected one of '}', '~', '=', '#', but appeared '%s'" % (ln or 0, cur))
 
     raise GiftSyntaxError("line %d: expected '}', but reached end of file" % ln)
 
 
-def find_decorated_text(txt):
-    buf = []
-    while txt:
-        m1 = re.match('.*(::).*(::).*', txt)
-        m2 = re.match('.*([*][*]).*([*][*]).*', txt)
-        m = m1
-        if m1 is None:
-            m = m2
-        elif m2 and m1.start(1) > m2.start(1):
-            m = m2
-        if not m:
-            buf.append(txt)
-            txt = ''
-        else:
-            s1 = txt[:m.start(1)]
-            b = txt[m.end(1):m.start(2)]
-            txt = txt[m.end(2):]
-            buf.extend([s1, Node(m.group(1), [b])])
-    return buf
+def gift_parse(lines, merge_empty_line=False):
+    def find_decorated_text(txt):
+        if txt == '':
+            return ['']
 
+        buf = []
+        while txt:
+            m1 = re.match('.*(::).*(::).*', txt)
+            m2 = re.match('.*([*][*]).*([*][*]).*', txt)
+            m = m1
+            if m1 is None:
+                m = m2
+            elif m2 and m1.start(1) > m2.start(1):
+                m = m2
+            if not m:
+                buf.append(txt)
+                txt = ''
+            else:
+                s1 = txt[:m.start(1)]
+                b = txt[m.end(1):m.start(2)]
+                txt = txt[m.end(2):]
+                buf.extend([s1, Node(m.group(1), [b])])
+        return buf
 
-def gift_parse(lines):
     node = Node('', [])
     gift_it = gift_split(lines)
     cur, ln = get_next(gift_it)
@@ -208,12 +220,20 @@ def gift_parse(lines):
             node.body.append(cn)
             cur, ln = get_next(gift_it)
         else:
-            if node.body and isinstance(node.body[-1], str):
+            if node.body and isinstance(node.body[-1], str) and (cur == '' and merge_empty_line):
                 cur = node.body[-1] + cur
                 del node.body[-1]
             b = find_decorated_text(cur)
             node.body.extend(b)
             cur, ln = get_next(gift_it)
+
+    # remove heading and trailing empty lines
+    nb = node.body
+    while nb and isinstance(nb[0], str) and nb[0] == '':
+        del nb[0]
+    while nb and isinstance(nb[-1], str) and nb[-1] == '':
+        del nb[-1]
+
     return node
 
 
