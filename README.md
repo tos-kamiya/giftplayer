@@ -7,18 +7,16 @@ Gift format is a text format for quiz [document](https://docs.moodle.org/23/en/G
 Usage 1: Generate a HTML documnet for a given Gift quiz.
 
 ```sh
-$ cat q.gift
-::Q1:: Two times three equals {=six =6}.
-$ python3 giftplayer_run.py html | bcat
+$ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplayer_run.py html | bcat
 ```
 
 Usage 2: Run a web server for a given gift quiz.
 
 ```sh
-$ python3 giftplayer_run.py web q.gift
+$ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplayer_run.py web
 ```
 
-![screenshot](https://cloud.githubusercontent.com/assets/1262286/23262779/3a286298-fa1f-11e6-8686-16cb31643d59.jpg)
+![screenshot](https://cloud.githubusercontent.com/assets/1262286/23339329/61293a0c-fc63-11e6-85fa-ccb2a2b04d60.jpg)
 
 ## License
 
