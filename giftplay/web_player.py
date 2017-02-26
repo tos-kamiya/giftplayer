@@ -1,6 +1,7 @@
 import os.path as path
 import random
 import re
+import sys
 
 from flask import Flask, request
 
@@ -201,6 +202,7 @@ def submit_answer():
     # return '<br>'.join(request.form.keys())
     
     ast = read_quiz_script(GIFT_SCRIPT[0])
+    ast = html_escape_node_body_strs(ast)
     answer_table = gift_build_quiz_answer(ast)
     
     quiz_keys = list(answer_table.keys())
