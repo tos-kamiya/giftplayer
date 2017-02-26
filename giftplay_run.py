@@ -14,8 +14,9 @@ def cli(ctx):
 @cli.command(help='Generate HTML')
 @click.argument('gift_script', default='')
 @click.option('--shuffle', '-s', help='Seed of shuffling choices of each question', default=-1)
-def html(gift_script, shuffle):
-    html_form.entrypoint(gift_script, False, shuffle)
+@click.option('--debug-wo-hint', help='Debug option. Generate HTML w/o parsing answer', default=False)
+def html(gift_script, shuffle, debug_wo_hint):
+    html_form.entrypoint(gift_script, False, shuffle, debug_wo_hint)
 
 
 @cli.command(help='Run as web app')

@@ -135,8 +135,6 @@ def gift_build_form_content(ast, shuffle_func=None, length_hint=None):
     for cn in ast.body:
         if isinstance(cn, str):
             buf.append(cn)
-        elif cn.mark == '//':
-            pass
         elif cn.mark == '**':
             buf.append('<b>' + cn.body[0] + '</b>')
         elif cn.mark == '::':
@@ -147,7 +145,6 @@ def gift_build_form_content(ast, shuffle_func=None, length_hint=None):
             buf.extend(gift_build_html_i_quiz_node(cn, quiz_num, shuffle_func=shuffle_func, length_hint=lh))
         else:
             raise GiftSyntaxError("invalid node mark: %s" % cn.mark)
-    # sys.stderr.write("buf=%s\n" % repr(buf))  # debug
     return '\n'.join(buf)
 
 
@@ -167,7 +164,7 @@ def html_escape_node_body_strs(node):
         assert False
 
 
-def entrypoint(gift_script, answer, shuffle):
+def entrypoint(gift_script, answer, shuffle, debug_wo_hint):
     if shuffle >= 0:
         random.seed(shuffle)
         shuffle_func = random.shuffle
@@ -194,6 +191,10 @@ def entrypoint(gift_script, answer, shuffle):
         answer = gift_build_quiz_answer(ast)
         print(answer)
     else:
-        html = gift_build_form_content(ast, shuffle_func)
+        if debug_wo_hint:
+            html = gift_build_form_content(ast, shuffle_func)
+        else:
+            answer_table = gift_build_quiz_answer(ast)
+            html = gift_build_form_content(ast, shuffle_func, length_hint=answer_table)
         html = HEAD + html + FOOT
         print(html)

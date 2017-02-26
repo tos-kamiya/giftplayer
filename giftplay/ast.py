@@ -27,14 +27,17 @@ def gift_split(lines):
     for li, L in enumerate(lines):
         linenum = li + 1
         L = L.strip()
-        if re.match(r'^//.*$', L):
-            yield L, linenum  # comment line
+        if re.match(r'^//.*$', L):  # comment line
+            pass
+        elif L == '':  # empty line
+            yield '', linenum
         else:
             for t in re.split(r'((?<!\\)[(){}~=#])', L):
                 t = re.sub(r'\\([(){}~=#])', r'\1', t)
-                if re.match(r'^\s+$', t):
-                    t = ''
-                yield t, linenum
+                if re.match(r'^\s*$', t):
+                    pass
+                else:
+                    yield t, linenum
 
 
 def get_next(gift_split_it, skip_empty_str=False):
@@ -136,7 +139,7 @@ def gift_parse_i_block(cur, ln, gift_it):
     cur, ln = get_next_w_skip(gift_it)
     if cur == '}':
         node = Node('{}', [])
-        cur, ln = get_next_w_skip(gift_it)
+        cur, ln = get_next(gift_it)
         return node, cur, ln
 
     if cur in ('T', 'True', 'F', 'False'):
@@ -147,7 +150,7 @@ def gift_parse_i_block(cur, ln, gift_it):
         node = Node('{T}', [cur])
         cur, ln = get_next_w_skip(gift_it)
         assert_token(cur, ln, '}')
-        cur, ln = get_next_w_skip(gift_it)
+        cur, ln = get_next(gift_it)
         return node, cur, ln
 
     if cur == '#':
@@ -157,13 +160,13 @@ def gift_parse_i_block(cur, ln, gift_it):
         cur, ln = get_next_w_skip(gift_it)
         if cur != '}':
             raise GiftSyntaxError("line %d: 'multiple numeric answers' not implemented yet" % (ln or 0))
-        cur, ln = get_next_w_skip(gift_it)
+        cur, ln = get_next(gift_it)
         return node, cur, ln
 
     node = Node('{~}', [])  # tentative
     while cur is not None:
         if cur == '}':
-            cur, ln = get_next_w_skip(gift_it)
+            cur, ln = get_next(gift_it)
             node = convert_node_if_needed(node)
             return node, cur, ln
         elif cur == '=':
@@ -215,10 +218,6 @@ def gift_parse(lines, merge_empty_line=False):
         if cur == '{':
             cn, cur, ln = gift_parse_i_block(cur, ln, gift_it)
             node.body.append(cn)
-        elif cur.startswith('//'):
-            cn = Node('//', [cur])
-            node.body.append(cn)
-            cur, ln = get_next(gift_it)
         else:
             if node.body and isinstance(node.body[-1], str) and (cur == '' and merge_empty_line):
                 cur = node.body[-1] + cur
