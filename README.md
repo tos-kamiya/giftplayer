@@ -1,4 +1,4 @@
-# giftplayer, a hany GIFT quiz player
+# giftplayer, a handy GIFT quiz player
 
 Gift format is a text format for quiz [document](https://docs.moodle.org/23/en/GIFT_format) of Moodle CMS.
 
