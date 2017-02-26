@@ -11,6 +11,7 @@ from .html_form_answer import gift_build_quiz_answer
 
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
+SAMPLE_GIFT_FILE = "sample.gift"
 
 with open(path.join(SCRIPTDIR, "sample.gift"), 'r', encoding='utf-8') as _f:
     SAMPLE_GIFT_SCRIPT = _f.read()
@@ -90,13 +91,11 @@ app = Flask(__name__)
 
 
 def read_quiz_script(gift_script):
-    lines = None
-    if gift_script:
+    if gift_script == '-':
+        lines = sys.stdin.readlines()
+    else:
         with open(gift_script, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-
-    if not lines:
-        lines = SAMPLE_GIFT_SCRIPT.split('\n')
 
     ast = gift_parse(lines, merge_empty_line=False)
     # print(ast)
@@ -222,6 +221,9 @@ def submit_answer():
 
 
 def entrypoint(gift_script, shuffle):
+    if not gift_script:
+        sys.stderr.write("> No gift_script is given. Use %s.\n" % SAMPLE_GIFT_FILE)
+        gift_script = path.join(SCRIPTDIR, SAMPLE_GIFT_FILE)
     GIFT_SCRIPT[0] = gift_script
 
     if shuffle >= 0:
@@ -231,4 +233,4 @@ def entrypoint(gift_script, shuffle):
         shuffle_func = lambda lst: None
     SHUFFLE_FUNC[0] = shuffle_func
 
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

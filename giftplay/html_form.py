@@ -8,10 +8,7 @@ from .html_form_answer import gift_build_quiz_answer
 
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
-
-
-with open(path.join(SCRIPTDIR, "sample.gift"), 'r', encoding='utf-8') as _f:
-    SAMPLE_GIFT_SCRIPT = _f.read()
+SAMPLE_GIFT_FILE = "sample.gift"
 
 CSS = """
 <style type="text/css">
@@ -171,14 +168,15 @@ def entrypoint(gift_script, answer, shuffle):
         shuffle_func = random.shuffle
     else:
         shuffle_func = lambda lst: None
+    if not gift_script:
+        sys.stderr.write("> No gift_script is given. Use %s.\n" % SAMPLE_GIFT_FILE)
+        gift_script = path.join(SCRIPTDIR, SAMPLE_GIFT_FILE)
 
-    lines = None
-    if gift_script:
+    if gift_script == '-':
+        lines = sys.stdin.readlines()
+    else:
         with open(gift_script, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-
-    if not lines:
-        lines = SAMPLE_GIFT_SCRIPT.split('\n')
 
     # for token, linenum in gift_split(lines):
     #     print("%d: %s" % (linenum, token))
