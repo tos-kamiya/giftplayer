@@ -181,7 +181,7 @@ def gift_parse_i_block(cur, ln, gift_it):
         else:
             raise GiftSyntaxError("line %d: expected one of '}', '~', '=', '#', but appeared '%s'" % (ln or 0, cur))
 
-    raise GiftSyntaxError("line %d: expected '}', but reached end of file" % ln)
+    raise GiftSyntaxError("line %d: expected '}', but reached end of file" % (ln or 0))
 
 
 def gift_parse(lines, merge_empty_line=False):
