@@ -85,14 +85,19 @@ FOOT_ANS = """
 
 # constant values, page contents (assigned before flask app instance is created)
 GIFT_SCRIPT = [None]
+GIFT_SCRIPT_CACHE = [None]
 SHUFFLE_FUNC = [None]
 
 app = Flask(__name__)
 
 
-def read_quiz_script(gift_script):
+def _read_quiz_script():
+    gift_script = GIFT_SCRIPT[0]
     if gift_script == '-':
-        lines = sys.stdin.readlines()
+        if GIFT_SCRIPT_CACHE[0] is not None:
+            lines = GIFT_SCRIPT_CACHE[0]
+        else:
+            lines = GIFT_SCRIPT_CACHE[0] = sys.stdin.readlines()
     else:
         with open(gift_script, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -105,7 +110,7 @@ def read_quiz_script(gift_script):
 
 @app.route('/', methods=['GET'])
 def quiz():
-    ast = read_quiz_script(GIFT_SCRIPT[0])
+    ast = _read_quiz_script()
     ast = html_escape_node_body_strs(ast)
     answer_table = gift_build_quiz_answer(ast)
     html = gift_build_form_content(ast, shuffle_func=SHUFFLE_FUNC[0], length_hint=answer_table)
@@ -201,7 +206,7 @@ def score_submission(submission, anwser_table):
 def submit_answer():
     # return '<br>'.join(request.form.keys())
     
-    ast = read_quiz_script(GIFT_SCRIPT[0])
+    ast = _read_quiz_script()
     ast = html_escape_node_body_strs(ast)
     answer_table = gift_build_quiz_answer(ast)
     
