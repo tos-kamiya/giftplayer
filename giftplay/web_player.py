@@ -107,7 +107,8 @@ def read_quiz_script(gift_script):
 def quiz():
     ast = read_quiz_script(GIFT_SCRIPT[0])
     ast = html_escape_node_body_strs(ast)
-    html = gift_build_form_content(ast, SHUFFLE_FUNC[0])
+    answer_table = gift_build_quiz_answer(ast)
+    html = gift_build_form_content(ast, shuffle_func=SHUFFLE_FUNC[0], length_hint=answer_table)
     html = HEAD + html + FOOT
     return html
 

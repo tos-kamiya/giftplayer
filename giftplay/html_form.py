@@ -50,7 +50,7 @@ def select_js(quiz_num):
     return SELECT_JS_TEMPLATE.format(quiz_num=quiz_num)
 
 
-def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None):
+def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None, length_hint=None):
     if shuffle_func is None:
         shuffle_func = lambda lst: None
     buf = []
@@ -88,7 +88,11 @@ def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None):
     elif node.mark == '{}':
         buf.append('<br /><textarea name="quiz%d" cols="40" rows="5"></textarea>' % quiz_num)
     elif node.mark in ('{=}', '{#}'):
-        buf.append('<input name="quiz%d" type="text" size="20" />' % quiz_num)
+        if length_hint:
+            expected_length = int((len(length_hint.body[0]) + 1) * 1.5)
+        else:
+            expected_length = 20
+        buf.append('<input name="quiz%d" type="text" size="%d" />' % (quiz_num, expected_length))
     elif node.mark == '{T}':
         buf.append('<select name="quiz%d">' % quiz_num)
         buf.append('<option value="">- select one -</option>')
@@ -124,7 +128,7 @@ def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None):
     return buf
 
 
-def gift_build_form_content(ast, shuffle_func=None):
+def gift_build_form_content(ast, shuffle_func=None, length_hint=None):
     buf = []
     quiz_num = 0
     assert isinstance(ast, Node)
@@ -139,7 +143,8 @@ def gift_build_form_content(ast, shuffle_func=None):
             buf.append('<h2>' + cn.body[0] + '</h2>')
         elif cn.mark.startswith('{'):
             quiz_num += 1
-            buf.extend(gift_build_html_i_quiz_node(cn, quiz_num, shuffle_func))
+            lh = length_hint.get(quiz_num) if length_hint else None
+            buf.extend(gift_build_html_i_quiz_node(cn, quiz_num, shuffle_func=shuffle_func, length_hint=lh))
         else:
             raise GiftSyntaxError("invalid node mark: %s" % cn.mark)
     # sys.stderr.write("buf=%s\n" % repr(buf))  # debug
