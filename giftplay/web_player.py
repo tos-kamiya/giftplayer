@@ -3,10 +3,12 @@ import random
 import re
 
 from flask import Flask, request
+from flask import g as FLASK_G
 
 from .ast import gift_parse
 from .html_form import html_escape_node_body_strs, gift_build_form_content
 from .html_form_answer import gift_build_quiz_answer
+
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
 
@@ -81,16 +83,37 @@ FOOT_ANS = """
 """
 
 # constant values, page contents (assigned before flask app instance is created)
-QUIZ_PAGE_HTML = []
-ANSWER_TABLE = []
-
+GIFT_SCRIPT = [None]
+SHUFFLE_FUNC = [None]
 
 app = Flask(__name__)
 
 
+def read_quiz_script(gift_script):
+    lines = None
+    if gift_script:
+        with open(gift_script, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+    if not lines:
+        lines = SAMPLE_GIFT_SCRIPT.split('\n')
+
+    # for token, linenum in gift_split(lines):
+    #     print("%d: %s" % (linenum, token))
+
+    ast = gift_parse(lines)
+    ast = html_escape_node_body_strs(ast)
+    # print(ast)
+
+    return ast
+
+
 @app.route('/', methods=['GET'])
-def hello():
-    return QUIZ_PAGE_HTML[0]
+def quiz():
+    ast = read_quiz_script(GIFT_SCRIPT[0])
+    html = gift_build_form_content(ast, SHUFFLE_FUNC[0])
+    html = HEAD + html + FOOT
+    return html
 
 
 def parse_form_content(form_content):
@@ -180,7 +203,10 @@ def score_submission(submission, anwser_table):
 @app.route('/submit_answer', methods=['POST'])
 def submit_answer():
     # return '<br>'.join(request.form.keys())
-    answer_table = ANSWER_TABLE[0]
+    
+    ast = read_quiz_script(GIFT_SCRIPT[0])
+    answer_table = gift_build_quiz_answer(ast)
+    
     quiz_keys = list(answer_table.keys())
     quiz_keys.sort()
 
@@ -198,32 +224,13 @@ def submit_answer():
 
 
 def entrypoint(gift_script, shuffle):
+    GIFT_SCRIPT[0] = gift_script
+
     if shuffle >= 0:
         random.seed(shuffle)
         shuffle_func = random.shuffle
     else:
         shuffle_func = lambda lst: None
-
-    lines = None
-    if gift_script:
-        with open(gift_script, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-
-    if not lines:
-        lines = SAMPLE_GIFT_SCRIPT.split('\n')
-
-    # for token, linenum in gift_split(lines):
-    #     print("%d: %s" % (linenum, token))
-
-    ast = gift_parse(lines)
-    ast = html_escape_node_body_strs(ast)
-    # print(ast)
-
-    html = gift_build_form_content(ast, shuffle_func)
-    html = HEAD + html + FOOT
-    QUIZ_PAGE_HTML.append(html)
-
-    answer = gift_build_quiz_answer(ast)
-    ANSWER_TABLE.append(answer)
+    SHUFFLE_FUNC[0] = shuffle_func
 
     app.run(debug=True)
