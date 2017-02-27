@@ -12,7 +12,7 @@ $ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplay_run.py - | b
 
 Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are using Ubuntu, it can be installed with `apt install ruby-bcat`).
 
-Usage 2: Run a web server for a given gift quiz.
+Usage 2: Run a web server for a given Gift quiz.
 
 ```sh
 $ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplay_run.py -w -
@@ -33,6 +33,7 @@ Supported:
 * math range
 * math range specified with interval end points
 * essay
+* multiple choice with multiple right answers
 
 Not yet supported:
 

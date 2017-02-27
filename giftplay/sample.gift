@@ -29,7 +29,7 @@
 // essay
 ::Q8:: How are you? {}
 
-// multiple choice
+// multiple choice with multiple right answers
 ::Q9:: Which months have 31 days? {
   ~%7%Jan
   ~%-100%Feb
