@@ -2,6 +2,7 @@ import html
 import os.path as path
 import sys
 import random
+import re
 
 from .ast import gift_parse, Node, GiftSyntaxError
 from .html_form_answer import gift_build_quiz_answer
@@ -48,6 +49,25 @@ with open(path.join(SCRIPTDIR, "match_question.js"), 'r') as _f:
 
 def select_js(quiz_num):
     return SELECT_JS_TEMPLATE.format(quiz_num=quiz_num)
+
+
+def _replace_bold_markup(text):
+    buf = []
+    s = text
+    while s:
+        j = s.find('**')
+        if j >= 0:
+            k = s.find('**', j + 2)
+            if k >= 0:
+                buf.extend([s[:j], '<b>', s[j + 2:k], '</b>'])
+                s = s[k + 2:]
+            else:
+                buf.append(s)
+                s = ''
+        else:
+            buf.append(s)
+            s = ''
+    return ''.join(buf)
 
 
 def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None, length_hint=None):
@@ -104,7 +124,7 @@ def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None, length_hint=N
         right_choices = []
         for cn in node.body:
             if cn.mark == '=':
-                left_choices.append(cn.body[0])
+                left_choices.append(_replace_bold_markup(cn.body[0]))
             elif cn.mark == '->':
                 right_choices.append(cn.body[0])
         assert len(left_choices) == len(right_choices)
@@ -134,9 +154,7 @@ def gift_build_form_content(ast, shuffle_func=None, length_hint=None):
     assert isinstance(ast, Node)
     for cn in ast.body:
         if isinstance(cn, str):
-            buf.append(cn)
-        elif cn.mark == '**':
-            buf.append('<b>' + cn.body[0] + '</b>')
+            buf.append(_replace_bold_markup(cn))
         elif cn.mark == '::':
             buf.append('<h2>' + cn.body[0] + '</h2>')
         elif cn.mark.startswith('{'):

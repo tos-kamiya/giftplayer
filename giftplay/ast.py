@@ -4,7 +4,7 @@ from collections import namedtuple
 
 
 Node = namedtuple('Node', ['mark', 'body'])  # mark is one of the followings
-# '', '//', '::', '**', '{}', '{T}', '{~}', '{=}', '{%}', '{#}', '{->}', '=', '~', '#', '->', '%+', '%-'
+# '', '//', '::', '{}', '{T}', '{~}', '{=}', '{%}', '{#}', '{->}', '=', '~', '#', '->', '%+', '%-'
 
 # node marks
 # {} essay
@@ -194,13 +194,7 @@ def gift_parse(lines, merge_empty_line=False):
 
         buf = []
         while txt:
-            m1 = re.match('.*(::).*(::).*', txt)
-            m2 = re.match('.*([*][*]).*([*][*]).*', txt)
-            m = m1
-            if m1 is None:
-                m = m2
-            elif m2 and m1.start(1) > m2.start(1):
-                m = m2
+            m = re.match('.*(::).*(::).*', txt)
             if not m:
                 buf.append(txt)
                 txt = ''
