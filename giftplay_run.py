@@ -1,7 +1,9 @@
-from giftplay import html_form
-from giftplay import web_player
+import sys
 
 import click
+
+from giftplay import html_form
+from giftplay import web_player
 
 
 @click.group(invoke_without_command=True)
@@ -23,6 +25,9 @@ def html(gift_script, shuffle, debug_wo_hint):
 @click.argument('gift_script', default='')
 @click.option('--shuffle', '-s', help='Seed of shuffling choices of each question', default=-1)
 def web(gift_script, shuffle):
+    if not sys.stdout.isatty():
+        sys.stdout.write("""<!DOCTYPE HTML><html><body>Go to <a href="http://127.0.0.1:5000">giftplay server</a></body></html>\n""")
+        sys.stdout.flush()
     web_player.entrypoint(gift_script, shuffle)
 
 
