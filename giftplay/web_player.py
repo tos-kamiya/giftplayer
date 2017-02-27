@@ -225,7 +225,7 @@ def submit_answer():
     return '\n'.join([HEAD_ANS] + buf + [FOOT_ANS])
 
 
-def entrypoint(gift_script, shuffle):
+def entrypoint(gift_script, shuffle, port=5000):
     if not gift_script:
         sys.stderr.write("> No gift_script is given. Use %s.\n" % SAMPLE_GIFT_FILE)
         gift_script = path.join(SCRIPTDIR, SAMPLE_GIFT_FILE)
@@ -238,4 +238,4 @@ def entrypoint(gift_script, shuffle):
         shuffle_func = lambda lst: None
     SHUFFLE_FUNC[0] = shuffle_func
 
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True, port=port, use_reloader=False)
