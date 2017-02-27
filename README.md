@@ -10,6 +10,8 @@ Usage 1: Generate a HTML document for a given Gift quiz.
 $ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplay_run.py - | bcat
 ```
 
+Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are using Ubuntu, it can be installed with `$ apt install ruby-bcat`).
+
 Usage 2: Run a web server for a given gift quiz.
 
 ```sh
