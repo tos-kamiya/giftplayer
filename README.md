@@ -10,7 +10,7 @@ Usage 1: Generate a HTML document for a given Gift quiz.
 $ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplay_run.py - | bcat
 ```
 
-Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are using Ubuntu, it can be installed with `$ apt install ruby-bcat`).
+Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are using Ubuntu, it can be installed with `apt install ruby-bcat`).
 
 Usage 2: Run a web server for a given gift quiz.
 
@@ -18,7 +18,25 @@ Usage 2: Run a web server for a given gift quiz.
 $ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplay_run.py -w -
 ```
 
-![screenshot](https://cloud.githubusercontent.com/assets/1262286/23339329/61293a0c-fc63-11e6-85fa-ccb2a2b04d60.jpg)
+![screenshot](images/screenshot.jpg)
+
+## Supported rules of GIFT syntax
+
+See [sample.gift](giftplay/sample.gift).
+
+Supported:
+
+* true/false
+* multiple choice
+* fill-in-the-blank
+* matching
+* math range
+* math range specified with interval end points
+* essay
+
+Not yet supported:
+
+* multiple numeric answers
 
 ## License
 
