@@ -158,12 +158,12 @@ def parse_form_content(form_content):
     return answer_tbl
 
 
-def score_submission(submission, anwser_table):
+def score_submission(submission, answer_table):
     pat_math_ans_wo_error = re.compile(r'^(\d+([.]\d+)?)$')
     pat_math_ans_with_error = re.compile(r'^(\d+([.]\d+)?):(\d+([.]\d+)?)$')
     pat_math_ans_range = re.compile(r'^(\d+([.]\d+)?)[.][.](\d+([.]\d+)?)$')
     score_table = {}
-    for k, an in sorted(anwser_table.items()):
+    for k, an in sorted(answer_table.items()):
         s = submission.get(k)
         if not s:
             score_table[k] = None

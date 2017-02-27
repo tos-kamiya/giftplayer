@@ -2,7 +2,6 @@ import html
 import os.path as path
 import sys
 import random
-import re
 
 from .ast import gift_parse, Node, GiftSyntaxError
 from .html_form_answer import gift_build_quiz_answer
