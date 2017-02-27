@@ -18,7 +18,7 @@ Usage 2: Run a web server for a given Gift quiz.
 $ echo '::Q1:: Two times three equals {=six =6}' | python3 giftplay_run.py -w -
 ```
 
-![screenshot](images/screenshot.jpg)
+![screenplay](images/screenplay.gif)
 
 ## Supported rules of GIFT syntax
 
