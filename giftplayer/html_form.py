@@ -26,7 +26,7 @@ with open(path.join(SCRIPTDIR, "jquery-3.1.1.min.js"), 'r') as _f:
 
 HEAD = """
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
 <meta charset="utf-8">
 %s
