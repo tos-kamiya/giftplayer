@@ -2,8 +2,8 @@ import sys
 
 import click
 
-from giftplay import html_form
-from giftplay import web_player
+from . import html_form
+from . import web_player
 
 
 @click.command(help="Render given GIFT script as HTML.")
@@ -22,5 +22,4 @@ def cmd(gift_script, shuffle, web_server, port, debug_wo_hint):
         html_form.entrypoint(gift_script, False, shuffle, debug_wo_hint)
 
 
-if __name__ == '__main__':
-    cmd()
+cmd()
