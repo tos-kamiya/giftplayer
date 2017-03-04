@@ -22,24 +22,25 @@ $ echo '::Q1:: Two times three equals {=six =6}' | python3 -m giftplayer.run -w 
 
 ## Installation
 
-To install, clone the repository & run setup.py
+Just to try it, clone the repository & run it like:
 
 ```sh
 $ git clone https://github.com/tos-kamiya/giftplayer
 $ cd giftplayer
-$ sudo python3 setup.py install
-```
-
-To check the installation, run it without any arguments.
-It will show a html text generated from a sample Gift file.
-
-```sh
-$ python3 -m giftplayer.run -w
+$ python3 -m giftplayer.run
 > No gift_script is given. Use sample.gift.
 
 <!DOCTYPE html>
 <html>
 ....
+```
+
+To install, run setup.py, after cloning the repository.
+
+```sh
+$ git clone https://github.com/tos-kamiya/giftplayer
+$ cd giftplayer
+$ sudo python3 setup.py install
 ```
 
 ## Supported rules of GIFT syntax
