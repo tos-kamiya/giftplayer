@@ -2,7 +2,7 @@ import sys
 
 import click
 
-from . import html_form
+from . import html_form_builder
 from . import web_player
 
 
@@ -19,7 +19,7 @@ def cmd(gift_script, shuffle, web_server, port, debug_wo_hint):
             sys.stdout.flush()
         web_player.entrypoint(gift_script, shuffle, port)
     else:
-        html_form.entrypoint(gift_script, False, shuffle, debug_wo_hint)
+        html_form_builder.entrypoint(gift_script, False, shuffle, debug_wo_hint)
 
 
 cmd()

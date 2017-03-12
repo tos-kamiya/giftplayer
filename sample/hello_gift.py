@@ -1,7 +1,7 @@
 from flask import Flask, request
 
 
-from giftplayer import gift_parse, gift_build_form_content, html_escape_node_body_strs
+from giftplayer import gift_parse, build_form_content, html_escape_node_body_strs
 
 
 HEAD = """
@@ -42,7 +42,7 @@ app = Flask(__name__)
 def quiz():
     quiz_ast = gift_parse(QUIZ_LINES)
     ast = html_escape_node_body_strs(quiz_ast)
-    html = gift_build_form_content(ast)
+    html = build_form_content(ast)
     return HEAD + """<form action="/submit_answer" method="post">""" + html + \
            """<br /><button class="submit" type=submit">Send</button></form>""" + FOOT
 

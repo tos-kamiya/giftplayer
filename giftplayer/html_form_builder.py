@@ -3,8 +3,8 @@ import os.path as path
 import sys
 import random
 
-from .ast import gift_parse, Node, GiftSyntaxError
-from .html_form_answer import gift_build_quiz_answer
+from .gift_ast import gift_parse, Node, GiftSyntaxError
+from .answer_scorer import build_quiz_answer
 
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
@@ -69,7 +69,7 @@ def _replace_bold_markup(text):
     return ''.join(buf)
 
 
-def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None, length_hint=None):
+def build_html_i_quiz_node(node, quiz_num, shuffle_func=None, length_hint=None):
     if shuffle_func is None:
         shuffle_func = lambda lst: None
     buf = []
@@ -147,7 +147,7 @@ def gift_build_html_i_quiz_node(node, quiz_num, shuffle_func=None, length_hint=N
     return buf
 
 
-def gift_build_form_content(ast, shuffle_func=None, length_hint=None):
+def build_form_content(ast, shuffle_func=None, length_hint=None):
     buf = []
     quiz_num = 0
     assert isinstance(ast, Node)
@@ -159,7 +159,7 @@ def gift_build_form_content(ast, shuffle_func=None, length_hint=None):
         elif cn.mark.startswith('{'):
             quiz_num += 1
             lh = length_hint.get(quiz_num) if length_hint else None
-            buf.extend(gift_build_html_i_quiz_node(cn, quiz_num, shuffle_func=shuffle_func, length_hint=lh))
+            buf.extend(build_html_i_quiz_node(cn, quiz_num, shuffle_func=shuffle_func, length_hint=lh))
         else:
             raise GiftSyntaxError("invalid node mark: %s" % cn.mark)
     return '\n'.join(buf)
@@ -205,13 +205,13 @@ def entrypoint(gift_script, answer, shuffle, debug_wo_hint):
     # print(ast)
 
     if answer:
-        answer = gift_build_quiz_answer(ast)
+        answer = build_quiz_answer(ast)
         print(answer)
     else:
         if debug_wo_hint:
-            html = gift_build_form_content(ast, shuffle_func)
+            html = build_form_content(ast, shuffle_func)
         else:
-            answer_table = gift_build_quiz_answer(ast)
-            html = gift_build_form_content(ast, shuffle_func, length_hint=answer_table)
+            answer_table = build_quiz_answer(ast)
+            html = build_form_content(ast, shuffle_func, length_hint=answer_table)
         html = HEAD + html + FOOT
         print(html)
