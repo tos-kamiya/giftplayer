@@ -181,6 +181,23 @@ def html_escape_node_body_strs(node):
         assert False
 
 
+def build_with_answer_render(ast, answer_rendering_func):
+    buf = []
+    quiz_num = 0
+    assert isinstance(ast, Node)
+    for cn in ast.body:
+        if isinstance(cn, str):
+            buf.append(_replace_bold_markup(cn))
+        elif cn.mark == '::':
+            buf.append('<h2>' + cn.body[0] + '</h2>')
+        elif cn.mark.startswith('{'):
+            quiz_num += 1
+            buf.append(answer_rendering_func(quiz_num))
+        else:
+            raise GiftSyntaxError("invalid node mark: %s" % cn.mark)
+    return '\n'.join(buf)
+
+
 def entrypoint(gift_script, answer, shuffle, debug_wo_hint):
     if shuffle >= 0:
         random.seed(shuffle)

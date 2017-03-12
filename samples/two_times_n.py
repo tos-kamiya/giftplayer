@@ -2,6 +2,7 @@ import random
 
 from flask import Flask, request
 
+from giftplayer import Node, build_with_answer_render
 from giftplayer import gift_parse, build_form_content, html_escape_node_body_strs
 from giftplayer import build_quiz_answer, parse_form_content, score_submission
 
@@ -46,38 +47,41 @@ QUIZ_LINES = """
 random.shuffle(QUIZ_LINES)
 QUIZ_LINES = '\n'.join(QUIZ_LINES).replace('\n', '\n\n').split('\n')
 
+QUIZ_AST = html_escape_node_body_strs(gift_parse(QUIZ_LINES))
+ANSWER_TABLE = build_quiz_answer(QUIZ_AST)
+
 app = Flask(__name__)
 
 
 @app.route('/', methods=['GET'])
 def quiz():
-    quiz_ast = gift_parse(QUIZ_LINES)
-    ast = html_escape_node_body_strs(quiz_ast)
-    answer_table = build_quiz_answer(quiz_ast)
-    html = build_form_content(ast, length_hint=answer_table)
+    html = build_form_content(QUIZ_AST, length_hint=ANSWER_TABLE)
     return HEAD + """<form action="/submit_answer" method="post">""" + html + \
            """<br /><button class="submit" type=submit">Send</button></form>""" + FOOT
 
 
 @app.route('/submit_answer', methods=['POST'])
 def submit_answer():
-    quiz_ast = gift_parse(QUIZ_LINES)
-    ast = html_escape_node_body_strs(quiz_ast)
-    answer_table = build_quiz_answer(ast)
-
     fc = parse_form_content(request.form)
-    score_table = score_submission(fc, answer_table)
+    score_table = score_submission(fc, ANSWER_TABLE)
 
-    correct_count = 0
-    miss_count = 0
-    for k in answer_table.keys():
-        if score_table.get(k):
-            correct_count += 1
-        else:
-            miss_count += 1
-    c = correct_count + miss_count
-    s = correct_count * 1.0 / c
-    return HEAD + """Result: %dpts (%d out of %d).""" % (int(s * 100), correct_count, c) + FOOT
+    oks = [k for k in ANSWER_TABLE.keys() if score_table.get(k)]
+    points = len(oks) * 100 / len(ANSWER_TABLE)
+
+    buf = []
+    buf.append('Overall result:')
+    buf.append('<span style="font-weight: bold;">%d points</span> (%d out of %d).' % (points, len(oks), len(ANSWER_TABLE)))
+    buf.append('')
+
+    ngstr = ' <span style="color: red; font-weight: bold;">-&gt;WRONG</span>'
+    okstr = ' -&gt;OK'
+    def render_func(quiz_num):
+        v = fc.get(quiz_num, "*")
+        return v + (okstr if quiz_num in oks else ngstr)
+    buf.append("Result for each quiz:")
+    buf.append(build_with_answer_render(QUIZ_AST, render_func))
+
+    return '<br />'.join(buf)
 
 
 app.run(debug=True)
