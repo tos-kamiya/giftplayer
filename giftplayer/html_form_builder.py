@@ -181,7 +181,7 @@ def html_escape_node_body_strs(node):
         assert False
 
 
-def build_with_answer_render(ast, answer_rendering_func):
+def build_html_with_answer_render(ast, answer_rendering_func):
     buf = []
     quiz_num = 0
     assert isinstance(ast, Node)

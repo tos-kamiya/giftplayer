@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+
 import random
 
 from flask import Flask, request
 
-from giftplayer import Node, build_with_answer_render
+from giftplayer import Node, build_html_with_answer_render
 from giftplayer import gift_parse, build_form_content, html_escape_node_body_strs
 from giftplayer import build_quiz_answer, parse_form_content, score_submission
 
@@ -79,7 +81,7 @@ def submit_answer():
         v = fc.get(quiz_num, "*")
         return v + (okstr if quiz_num in oks else ngstr)
     buf.append("Result for each quiz:")
-    buf.append(build_with_answer_render(QUIZ_AST, render_func))
+    buf.append(build_html_with_answer_render(QUIZ_AST, render_func))
 
     return '<br />'.join(buf)
 

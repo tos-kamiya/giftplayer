@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, request
 
 from giftplayer import gift_parse, build_form_content, html_escape_node_body_strs
