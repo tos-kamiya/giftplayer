@@ -1,10 +1,10 @@
 import os.path as path
 import random
-import re
 import sys
 
 from flask import Flask, request
 
+from .html import DEFAULT_SEND_BUTTON, DEFAULT_CSS, JQUERY_LOCAL_JS
 from .gift_ast import gift_parse
 from .html_form_builder import html_escape_node_body_strs, build_form_content
 from .answer_scorer import build_quiz_answer, parse_form_content, score_submission
@@ -17,16 +17,8 @@ with open(path.join(SCRIPTDIR, "sample.gift"), 'r', encoding='utf-8') as _f:
     SAMPLE_GIFT_SCRIPT = _f.read()
 
 CSS = """
+""" + DEFAULT_CSS + """
 <style type="text/css">
-* {
-  font-family: sans-serif;
-}
-button.submit {
-  padding: 5px 20px;
-  background-color: #248;
-  color: #fff;
-  border-style: none;
-}
 table.score {
   border-collapse: collapse;
   border: 2px solid #333;
@@ -36,12 +28,6 @@ table.score td, table.score th {
   border: 1px solid #333;
 }
 </style>
-"""
-
-with open(path.join(SCRIPTDIR, "jquery-3.1.1.min.js"), 'r') as _f:
-    JS = """
-<script>""" + _f.read() + """
-</script>
 """
 
 HEAD = """
@@ -54,16 +40,16 @@ HEAD = """
 </head>
 <body>
 <form action="/submit_answer" method="post">
-""" % (CSS, JS)
+""" % (CSS, JQUERY_LOCAL_JS)
 
 FOOT = """
 <br />
 <br />
-<button class="submit" type=submit">Send</button>
+%s
 </form>
 </body>
 </html>
-"""
+""" % DEFAULT_SEND_BUTTON
 
 HEAD_ANS = """
 <!DOCTYPE html>

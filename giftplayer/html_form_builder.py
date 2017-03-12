@@ -3,26 +3,13 @@ import os.path as path
 import sys
 import random
 
+from .html import DEFAULT_CSS, JQUERY_LOCAL_JS
 from .gift_ast import gift_parse, Node, GiftSyntaxError
 from .answer_scorer import build_quiz_answer
 
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
 SAMPLE_GIFT_FILE = "sample.gift"
-
-CSS = """
-<style type="text/css">
-* {
-  font-family: sans-serif;
-}
-</style>
-"""
-
-with open(path.join(SCRIPTDIR, "jquery-3.1.1.min.js"), 'r') as _f:
-    JS = """
-<script>""" + _f.read() + """
-</script>
-"""
 
 HEAD = """
 <!DOCTYPE html>
@@ -34,7 +21,7 @@ HEAD = """
 </head>
 <body>
 <form>
-""" % (CSS, JS)
+""" % (DEFAULT_CSS, JQUERY_LOCAL_JS)
 
 FOOT = """
 </form>
