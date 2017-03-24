@@ -42,6 +42,7 @@ $ git clone https://github.com/tos-kamiya/giftplayer
 $ cd giftplayer
 $ sudo python3 setup.py install
 ```
+Note that `pip3 install git+https:://github.com/tos-kamiya/giftplayer` WILL NOT WORK, due to some files not being copied.
 
 ## Supported rules of GIFT syntax
 
