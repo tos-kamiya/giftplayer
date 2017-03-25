@@ -35,14 +35,7 @@ $ python3 -m giftplayer.run
 ....
 ```
 
-To install, run setup.py, after cloning the repository.
-
-```sh
-$ git clone https://github.com/tos-kamiya/giftplayer
-$ cd giftplayer
-$ sudo python3 setup.py install
-```
-Note that `pip3 install git+https:://github.com/tos-kamiya/giftplayer` WILL NOT WORK, due to some files not being copied.
+To install, run `sudo pip3 install git+https:://github.com/tos-kamiya/giftplayer`.
 
 ## Supported rules of GIFT syntax
 
