@@ -27,9 +27,7 @@ Just to try it, clone the repository & run it like:
 ```sh
 $ git clone https://github.com/tos-kamiya/giftplayer
 $ cd giftplayer
-$ python3 -m giftplayer.run
-> No gift_script is given. Use sample.gift.
-
+$ ./giftplayer_run cat giftplayer/sample.gift
 <!DOCTYPE html>
 <html>
 ....
