@@ -13,7 +13,7 @@ setup(
     install_requires=requirements,
     author='Toshihiro Kamiya',
     author_email='kamiya@mgj.nifty.com',
-    scripts=['gitfplayer_run'],
+    scripts=['giftplayer_run'],
     packages=find_packages(),
     package_data={'giftplayer': ['jquery-3.1.1.min.js', 'match_question.js', 'sample.gift']},
     include_package_data=True,
