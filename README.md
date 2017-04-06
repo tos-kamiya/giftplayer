@@ -37,6 +37,22 @@ $ python3 -m giftplayer.run
 
 To install, run `sudo pip3 install git+https://github.com/tos-kamiya/giftplayer`.
 
+## CLI usage
+
+```
+$ python3 -m giftplayer.run --help
+Usage: run.py [OPTIONS] [GIFT_SCRIPT]
+
+  Render given GIFT script as HTML.
+
+Options:
+  -s, --shuffle INTEGER  Seed of shuffling choices of each question
+  -w, --web-server       Run as web app
+  -p, --port INTEGER     Port number of web app
+  --debug-wo-hint        Debug option. Generate HTML w/o parsing answer
+  --help                 Show this message and exit.
+```
+
 ## Supported rules of GIFT syntax
 
 See [sample.gift](giftplay/sample.gift).
