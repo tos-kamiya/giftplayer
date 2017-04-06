@@ -35,7 +35,7 @@ $ python3 -m giftplayer.run
 ....
 ```
 
-To install, run `sudo pip3 install git+https:://github.com/tos-kamiya/giftplayer`.
+To install, run `sudo pip3 install git+https://github.com/tos-kamiya/giftplayer`.
 
 ## Supported rules of GIFT syntax
 
