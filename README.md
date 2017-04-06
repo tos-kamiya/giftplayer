@@ -7,7 +7,7 @@ Gift format is a text format for quiz [document](https://docs.moodle.org/23/en/G
 Usage 1: Generate a HTML document for a given Gift quiz.
 
 ```sh
-$ echo '::Q1:: Two times three equals {=six =6}' | python3 -m giftplayer.run - | bcat
+$ echo '::Q1:: Two times three equals {=six =6}' | giftplayer_run cat - | bcat
 ```
 
 Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are using Ubuntu, it can be installed with `apt install ruby-bcat`).
@@ -15,7 +15,7 @@ Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are usin
 Usage 2: Run a web server for a given Gift quiz.
 
 ```sh
-$ echo '::Q1:: Two times three equals {=six =6}' | python3 -m giftplayer.run -w -
+$ echo '::Q1:: Two times three equals {=six =6}' | giftplayer_run web -
 ```
 
 ![screenplay](images/screenplay.gif)
@@ -40,17 +40,15 @@ To install, run `sudo pip3 install git+https://github.com/tos-kamiya/giftplayer`
 ## CLI usage
 
 ```
-$ python3 -m giftplayer.run --help
-Usage: run.py [OPTIONS] [GIFT_SCRIPT]
-
-  Render given GIFT script as HTML.
+Usage:
+  giftplayer_run cat [options] <giftscript>
+  giftplayer_run web [options] <giftscript>
+  giftplayer_run (--help|--version)
 
 Options:
-  -s, --shuffle INTEGER  Seed of shuffling choices of each question
-  -w, --web-server       Run as web app
-  -p, --port INTEGER     Port number of web app
-  --debug-wo-hint        Debug option. Generate HTML w/o parsing answer
-  --help                 Show this message and exit.
+  -s <seed> --shuffle=<seed>  Seed of shuffling choices of each question.
+  -p <port> --port=<PORT>     Port number of web app', [default: 5000].
+  --debug-wo-hint             Debug option. Generate HTML w/o parsing answer.
 ```
 
 ## Supported rules of GIFT syntax

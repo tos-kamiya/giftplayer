@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+
+import sys
+
+from docopt import docopt
+
+from giftplayer import html_form_builder
+from giftplayer import web_player
+
+
+__doc__ = """Render/serve given GIFT script as HTML.
+
+Usage:
+  giftplayer_run cat [options] <giftscript>
+  giftplayer_run web [options] <giftscript>
+  giftplayer_run (--help|--version)
+
+Options:
+  -s <seed> --shuffle=<seed>  Seed of shuffling choices of each question.
+  -p <port> --port=<PORT>     Port number of web app', [default: 5000].
+  --debug-wo-hint             Debug option. Generate HTML w/o parsing answer.
+"""
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+    gift_script = args['<giftscript>']
+    shuffle_seed = int(args['--shuffle'] or "-1")
+    web_server = args['web'] or False
+    port = int(args['--port'])
+    debug_wo_hint = args['--debug-wo-hint'] or None
+
+    if web_server:
+        if not sys.stdout.isatty():
+            sys.stdout.write("""<!DOCTYPE HTML><html><body>Go to <a href="http://127.0.0.1:5000">giftplay server</a></body></html>\n""")
+            sys.stdout.flush()
+        web_player.entrypoint(gift_script, shuffle_seed, port)
+    else:
+        html_form_builder.entrypoint(gift_script, False, shuffle_seed, debug_wo_hint)
