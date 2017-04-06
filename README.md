@@ -27,7 +27,7 @@ Just to try it, clone the repository & run it like:
 ```sh
 $ git clone https://github.com/tos-kamiya/giftplayer
 $ cd giftplayer
-$ ./giftplayer_run cat giftplayer/sample.gift
+$ ./giftplayer_run cat samples/sample_quiz.gift
 <!DOCTYPE html>
 <html>
 ....
@@ -66,6 +66,7 @@ Supported:
 
 Not yet supported:
 
+* feedback
 * multiple numeric answers
 
 ## License

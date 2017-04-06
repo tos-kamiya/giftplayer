@@ -9,7 +9,6 @@ from .answer_scorer import build_quiz_answer
 
 
 SCRIPTDIR = path.dirname(path.realpath(__file__))
-SAMPLE_GIFT_FILE = "sample.gift"
 
 HEAD = """
 <!DOCTYPE html>
@@ -191,9 +190,6 @@ def entrypoint(gift_script, answer, shuffle, debug_wo_hint):
         shuffle_func = random.shuffle
     else:
         shuffle_func = lambda lst: None
-    if not gift_script:
-        sys.stderr.write("> No gift_script is given. Use %s.\n" % SAMPLE_GIFT_FILE)
-        gift_script = path.join(SCRIPTDIR, SAMPLE_GIFT_FILE)
 
     if gift_script == '-':
         lines = sys.stdin.readlines()

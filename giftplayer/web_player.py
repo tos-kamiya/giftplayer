@@ -10,12 +10,6 @@ from .html_form_builder import html_escape_node_body_strs, build_form_content
 from .answer_scorer import build_quiz_answer, parse_form_content, score_submission
 
 
-SCRIPTDIR = path.dirname(path.realpath(__file__))
-SAMPLE_GIFT_FILE = "sample.gift"
-
-with open(path.join(SCRIPTDIR, "sample.gift"), 'r', encoding='utf-8') as _f:
-    SAMPLE_GIFT_SCRIPT = _f.read()
-
 CSS = """
 """ + DEFAULT_CSS + """
 <style type="text/css">
@@ -107,11 +101,11 @@ def quiz():
 @app.route('/submit_answer', methods=['POST'])
 def submit_answer():
     # return '<br>'.join(request.form.keys())
-    
+
     ast = _read_quiz_script()
     ast = html_escape_node_body_strs(ast)
     answer_table = build_quiz_answer(ast)
-    
+
     quiz_keys = list(answer_table.keys())
     quiz_keys.sort()
 
@@ -129,9 +123,6 @@ def submit_answer():
 
 
 def entrypoint(gift_script, shuffle, port=5000):
-    if not gift_script:
-        sys.stderr.write("> No gift_script is given. Use %s.\n" % SAMPLE_GIFT_FILE)
-        gift_script = path.join(SCRIPTDIR, SAMPLE_GIFT_FILE)
     GIFT_SCRIPT[0] = gift_script
 
     if shuffle >= 0:

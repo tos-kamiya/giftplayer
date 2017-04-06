@@ -15,7 +15,7 @@ setup(
     author_email='kamiya@mgj.nifty.com',
     scripts=['giftplayer_run'],
     packages=find_packages(),
-    package_data={'giftplayer': ['jquery-3.1.1.min.js', 'match_question.js', 'sample.gift']},
+    package_data={'giftplayer': ['jquery-3.1.1.min.js', 'match_question.js']},
     include_package_data=True,
     url='https://github.com/tos-kamiya/giftplayer/',
     license='License :: OSI Approved :: BSD License',
