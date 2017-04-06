@@ -44,3 +44,6 @@
   ~%-100%Nov
   ~%9%Dec
 }
+
+// multiple choice allows multiple right answers
+Select one of even numbers { ~1 =2 ~3 =4 ~5 }.

@@ -119,9 +119,9 @@ def score_submission(submission, answer_table):
         else:
             if an.mark == '{}':
                 score_table[k] = 'filled'
-            elif an.mark in ('{T}', '{~}'):
+            elif an.mark == '{T}':
                 score_table[k] = s == an.body[0]
-            elif an.mark == '{=}':
+            elif an.mark in ('{~}', '{=}'):
                 score_table[k] = any(s == correct_str for correct_str in an.body)
             elif an.mark == '{%}':
                 score_table[k] = set(s) == set(an.body)
