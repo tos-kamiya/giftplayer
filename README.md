@@ -35,6 +35,8 @@ $ ./giftplayer_run cat samples/sample_quiz.gift
 
 To install, run `sudo pip3 install git+https://github.com/tos-kamiya/giftplayer`.
 
+To uninstall, run `sudo pip3 uninstall giftplayer` .
+
 ## CLI usage
 
 ```
