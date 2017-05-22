@@ -7,7 +7,7 @@ Gift format is a text format for quiz [document](https://docs.moodle.org/23/en/G
 Usage 1: Generate a HTML document for a given Gift quiz.
 
 ```sh
-$ echo '::Q1:: Two times three equals {=six =6}' | giftplayer_run cat - | bcat
+$ echo '::Q1:: Two times three equals {=six =6}' | giftplayer cat - | bcat
 ```
 
 Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are using Ubuntu, it can be installed with `apt install ruby-bcat`).
@@ -15,7 +15,7 @@ Here, [bcat](https://rtomayko.github.io/bcat/) is a HTML viewer (if you are usin
 Usage 2: Run a web server for a given Gift quiz.
 
 ```sh
-$ echo '::Q1:: Two times three equals {=six =6}' | giftplayer_run web -
+$ echo '::Q1:: Two times three equals {=six =6}' | giftplayer web -
 ```
 
 ![screenplay](images/screenplay.gif)
@@ -27,7 +27,7 @@ Just to try it, clone the repository & run it like:
 ```sh
 $ git clone https://github.com/tos-kamiya/giftplayer
 $ cd giftplayer
-$ ./giftplayer_run cat samples/sample_quiz.gift
+$ ./giftplayer cat samples/sample_quiz.gift
 <!DOCTYPE html>
 <html>
 ....
@@ -41,9 +41,9 @@ To uninstall, run `sudo pip3 uninstall giftplayer` .
 
 ```
 Usage:
-  giftplayer_run cat [options] <giftscript>
-  giftplayer_run web [options] <giftscript>
-  giftplayer_run (--help|--version)
+  giftplayer cat [options] <giftscript>
+  giftplayer web [options] <giftscript>
+  giftplayer (--help|--version)
 
 Options:
   -s <seed> --shuffle=<seed>  Seed of shuffling choices of each question.

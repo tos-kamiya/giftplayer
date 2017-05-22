@@ -2,18 +2,21 @@
 
 from setuptools import setup, find_packages
 
+from giftplayer import __version__
+
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-version = '0.1.4'
-
 setup(
     name='giftplayer',
-    version=version,
+    version=__version__,
     install_requires=requirements,
     author='Toshihiro Kamiya',
-    author_email='kamiya@mgj.nifty.com',
-    scripts=['giftplayer_run'],
+    author_email='kamiya@mbj.nifty.com',
+    entry_points="""
+      [console_scripts]
+      giftplayer = giftplayer:main
+      """,
     packages=find_packages(),
     package_data={'giftplayer': ['jquery-3.1.1.min.js', 'match_question.js']},
     include_package_data=True,
