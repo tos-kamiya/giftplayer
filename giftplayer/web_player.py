@@ -88,14 +88,22 @@ def _read_quiz_script():
     return ast
 
 
-@app.route('/', methods=['GET'])
-def quiz():
+def _quiz():
     ast = _read_quiz_script()
     ast = html_escape_node_body_strs(ast)
     answer_table = build_quiz_answer(ast)
     html = build_form_content(ast, shuffle_func=SHUFFLE_FUNC[0], length_hint=answer_table)
     html = HEAD + html + FOOT
     return html
+
+@app.route('/', methods=['GET'])
+def quiz():
+    return _quiz()
+
+
+@app.route('/<foobar>', methods=['GET'])
+def quiz_foobar(foobar):
+    return _quiz()
 
 
 @app.route('/submit_answer', methods=['POST'])
@@ -124,6 +132,8 @@ def submit_answer():
 
 def entrypoint(gift_script, shuffle, port=5000):
     GIFT_SCRIPT[0] = gift_script
+    if not path.isfile(gift_script):
+        sys.exit("file not found: %s" % repr(gift_script))
 
     if shuffle >= 0:
         random.seed(shuffle)
