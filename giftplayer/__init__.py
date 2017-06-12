@@ -10,9 +10,9 @@ __version__ = '0.1.5'
 __doc__ = """Render/serve given GIFT script as HTML.
 
 Usage:
-  giftplayer_run cat [options] <giftscript>
-  giftplayer_run web [options] <giftscript>
-  giftplayer_run (--help|--version)
+  giftplayer cat [options] <giftscript>
+  giftplayer web [options] <giftscript>
+  giftplayer (--help|--version)
 
 Options:
   -s <seed> --shuffle=<seed>  Seed of shuffling choices of each question.
