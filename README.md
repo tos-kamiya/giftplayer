@@ -33,16 +33,18 @@ $ ./giftplayer cat samples/sample_quiz.gift
 ....
 ```
 
-To install, run `sudo pip3 install git+https://github.com/tos-kamiya/giftplayer`.
+Install `docopt` and `Flask` before running giftplayer, if not yet installed.
 
-To uninstall, run `sudo pip3 uninstall giftplayer` .
+To install giftplayer, run `sudo pip3 install git+https://github.com/tos-kamiya/giftplayer`.
+
+To uninstall giftplayer, run `sudo pip3 uninstall giftplayer` .
 
 ## CLI usage
 
 ```
 Usage:
   giftplayer cat [options] <giftscript>
-  giftplayer web [options] <giftscript>
+  giftplayer web [options] <giftscript_or_directory>
   giftplayer (--help|--version)
 
 Options:
@@ -51,15 +53,11 @@ Options:
   --debug-wo-hint             Debug option. Generate HTML w/o parsing answer.
 ```
 
-## Troubleshooting
-
-**Q**: I am writing a gift file `some-quiz.gift`. When I modify the file and then run `giftplayer web some-quiz.gift`, **the page content does not look updated** (even I reload the page with a `reload` button of a browser), showing the old content. Why?
-
-**A**: An HTML page caching of a web browser is sometimes uncontrollable. To avoid caching, add some path to the URL like: `http://localhost:5000/foo_bar` (`foo_bar` or any word you like). `giftplayer` server will show the quiz page for any path except for `/submit_answer`.
+`giftplayer web` can show multiple gift scripts in a directory (>= 0.1.6).
 
 ## Supported rules of GIFT syntax
 
-See [sample.gift](giftplay/sample.gift).
+See [sample_quiz.gift](samples/sample_quiz.gift).
 
 Supported:
 

@@ -1,8 +1,10 @@
+import os
 import os.path as path
 import random
 import sys
+from urllib.parse import quote, unquote
 
-from flask import Flask, request
+from flask import Flask, request, redirect, url_for, abort
 
 from .html import DEFAULT_SEND_BUTTON, DEFAULT_CSS, JQUERY_LOCAL_JS
 from .gift_ast import gift_parse
@@ -24,7 +26,7 @@ table.score td, table.score th {
 </style>
 """
 
-HEAD = """
+HEAD_QUIZ = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,16 +35,22 @@ HEAD = """
 %s
 </head>
 <body>
-<form action="/submit_answer" method="post">
 """ % (CSS, JQUERY_LOCAL_JS)
 
-FOOT = """
+FOOT_QUIZ = """
+</body>
+</html>
+"""
+
+FORM_HEAD = """
+<form action="/%s/submit_answer" method="post">
+"""
+
+FORM_FOOT = """
 <br />
 <br />
 %s
 </form>
-</body>
-</html>
 """ % DEFAULT_SEND_BUTTON
 
 HEAD_ANS = """
@@ -54,32 +62,51 @@ HEAD_ANS = """
 </head>
 """ % CSS
 
-FOOT_ANS = """
-<br />
-<a href="/">
-<div>Back to questions</div>
-</a>
-</body>
-</html>
-"""
+FOOT_ANS = FOOT_QUIZ
+
+HEAD_DIR = """
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+%s
+</head>
+<body>
+""" % CSS
+
+FOOT_DIR = FOOT_QUIZ
+
 
 # constant values, page contents (assigned before flask app instance is created)
-GIFT_SCRIPT = [None]
-GIFT_SCRIPT_CACHE = [None]
+GIFT_SCRIPT_DIR = [None]
+GIFT_SCRIPTS = []
+STDIN_CACHE = [None]
 SHUFFLE_FUNC = [None]
 
 app = Flask(__name__)
 
 
-def _read_quiz_script():
-    gift_script = GIFT_SCRIPT[0]
-    if gift_script == '-':
-        if GIFT_SCRIPT_CACHE[0] is not None:
-            lines = GIFT_SCRIPT_CACHE[0]
+@app.route('/', methods=['GET'])
+def root():
+    if len(GIFT_SCRIPTS) == 1:
+        return redirect("/" + quote(GIFT_SCRIPTS[0]))
+
+    buf = [HEAD_DIR]
+    for s in GIFT_SCRIPTS:
+        buf.append("<a href=%s>%s</a><br />" % (quote(s), s))
+    buf.append(FOOT_DIR)
+    return ''.join(buf)
+
+
+def _read_quiz_script(giftscript_unquoted):
+    gift_script_path = path.join(GIFT_SCRIPT_DIR[0], giftscript_unquoted)
+    if gift_script_path == '-':
+        if STDIN_CACHE[0] is not None:
+            lines = STDIN_CACHE[0]
         else:
-            lines = GIFT_SCRIPT_CACHE[0] = sys.stdin.readlines()
+            lines = STDIN_CACHE[0] = sys.stdin.readlines()
     else:
-        with open(gift_script, 'r', encoding='utf-8') as f:
+        with open(gift_script_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
     ast = gift_parse(lines, merge_empty_line=False)
@@ -88,29 +115,28 @@ def _read_quiz_script():
     return ast
 
 
-def _quiz():
-    ast = _read_quiz_script()
+def _quiz(giftscript_unquoted):
+    ast = _read_quiz_script(giftscript_unquoted)
     ast = html_escape_node_body_strs(ast)
     answer_table = build_quiz_answer(ast)
     html = build_form_content(ast, shuffle_func=SHUFFLE_FUNC[0], length_hint=answer_table)
-    html = HEAD + html + FOOT
+    html = FORM_HEAD % quote(giftscript_unquoted) + html + FORM_FOOT
+    html = HEAD_QUIZ + html + FOOT_QUIZ
     return html
 
-@app.route('/', methods=['GET'])
-def quiz():
-    return _quiz()
+
+@app.route('/<giftscript>', methods=['GET'])
+def quiz(giftscript):
+    giftscript_unquoted = unquote(giftscript)
+    if giftscript_unquoted not in GIFT_SCRIPTS:
+        abort(404)
+    return _quiz(giftscript_unquoted)
 
 
-@app.route('/<foobar>', methods=['GET'])
-def quiz_foobar(foobar):
-    return _quiz()
-
-
-@app.route('/submit_answer', methods=['POST'])
-def submit_answer():
-    # return '<br>'.join(request.form.keys())
-
-    ast = _read_quiz_script()
+@app.route('/<giftscript>/submit_answer', methods=['POST'])
+def submit_answer(giftscript):
+    giftscript_unquoted = unquote(giftscript)
+    ast = _read_quiz_script(giftscript_unquoted)
     ast = html_escape_node_body_strs(ast)
     answer_table = build_quiz_answer(ast)
 
@@ -131,9 +157,16 @@ def submit_answer():
 
 
 def entrypoint(gift_script, shuffle, port=5000):
-    GIFT_SCRIPT[0] = gift_script
-    if not path.isfile(gift_script):
-        sys.exit("file not found: %s" % repr(gift_script))
+    if path.isfile(gift_script):
+        GIFT_SCRIPT_DIR[0] = path.split(gift_script)[0]
+        GIFT_SCRIPTS.append(gift_script)
+    elif path.isdir(gift_script):
+        GIFT_SCRIPT_DIR[0] = gift_script
+        GIFT_SCRIPTS.extend(f for f in os.listdir(gift_script) if f.endswith('.gift'))
+        if len(GIFT_SCRIPTS) == 0:
+            sys.exit("error: no .gift file found in directory: %s" % repr(gift_script))
+    else:
+        sys.exit("error: no such file/directory found: %s" % repr(gift_script))
 
     if shuffle >= 0:
         random.seed(shuffle)
