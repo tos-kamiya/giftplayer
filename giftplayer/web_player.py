@@ -31,6 +31,8 @@ HEAD_QUIZ = """
 <html>
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
 %s
 %s
 </head>
@@ -58,23 +60,16 @@ HEAD_ANS = """
 <html>
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
 %s
 </head>
 """ % CSS
 
 FOOT_ANS = FOOT_QUIZ
 
-HEAD_DIR = """
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-%s
-</head>
-<body>
-""" % CSS
-
-FOOT_DIR = FOOT_QUIZ
+HEAD_DIR = HEAD_ANS
+FOOT_DIR = FOOT_ANS
 
 
 # constant values, page contents (assigned before flask app instance is created)
