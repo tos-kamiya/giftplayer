@@ -161,6 +161,7 @@ def entrypoint(gift_script, shuffle, port=5000):
     elif path.isdir(gift_script):
         GIFT_SCRIPT_DIR[0] = gift_script
         GIFT_SCRIPTS.extend(f for f in os.listdir(gift_script) if f.endswith('.gift'))
+        GIFT_SCRIPTS.sort()
         if len(GIFT_SCRIPTS) == 0:
             sys.exit("error: no .gift file found in directory: %s" % repr(gift_script))
     else:
