@@ -157,7 +157,10 @@ def submit_answer(giftscript):
 
 
 def entrypoint(gift_script, shuffle, port=5000):
-    if path.isfile(gift_script):
+    if gift_script == '-':
+        GIFT_SCRIPT_DIR[0] = ''
+        GIFT_SCRIPTS.append(gift_script)
+    elif path.isfile(gift_script):
         GIFT_SCRIPT_DIR[0] = path.split(gift_script)[0]
         GIFT_SCRIPTS.append(gift_script)
     elif path.isdir(gift_script):
