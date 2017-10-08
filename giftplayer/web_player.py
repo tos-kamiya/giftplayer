@@ -72,10 +72,15 @@ HEAD_DIR = HEAD_ANS
 FOOT_DIR = FOOT_ANS
 
 
+class GiftScriptInfo:
+    def __init__(self):
+        self.stdin_cache = None
+        self.script_file = None
+        self.dir = None
+
+
 # constant values, page contents (assigned before flask app instance is created)
-GIFT_SCRIPT_DIR = [None]
-GIFT_SCRIPTS = []
-STDIN_CACHE = [None]
+GIFT_SCRIPT_INFO = GiftScriptInfo()
 SHUFFLE_FUNC = [None]
 
 app = Flask(__name__)
@@ -83,35 +88,47 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def root():
-    if len(GIFT_SCRIPTS) == 1:
-        return redirect("/" + quote(GIFT_SCRIPTS[0]))
-
-    buf = [HEAD_DIR]
-    for s in GIFT_SCRIPTS:
-        buf.append("<a href=%s>%s</a><br />" % (quote(s), s))
-    buf.append(FOOT_DIR)
-    return ''.join(buf)
-
-
-def _read_quiz_script(giftscript_unquoted):
-    gift_script_path = path.join(GIFT_SCRIPT_DIR[0], giftscript_unquoted)
-    if gift_script_path == '-':
-        if STDIN_CACHE[0] is not None:
-            lines = STDIN_CACHE[0]
-        else:
-            lines = STDIN_CACHE[0] = sys.stdin.readlines()
+    if GIFT_SCRIPT_INFO.stdin_cache:
+        return redirect("/-")
+    elif GIFT_SCRIPT_INFO.script_file:
+        return redirect("/" + quote(GIFT_SCRIPT_INFO.script_file))
+    elif GIFT_SCRIPT_INFO.dir:
+        scripts = [f for f in os.listdir(GIFT_SCRIPT_INFO.dir) if f.endswith('.gift')]
+        scripts.sort()
+        buf = [HEAD_DIR]
+        buf.append("<b>directory: %s</b><br />" % quote(GIFT_SCRIPT_INFO.dir))
+        buf.append("<table>")
+        c = 0
+        items_in_row = 5
+        for s in scripts:
+            if c % items_in_row == 0:
+                buf.append("<tr>")
+            buf.append("<td><a href=%s>%s</a></td>" % (quote(s), s))
+            c += 1
+            if c % items_in_row == 0:
+                buf.append("</tr>")
+        if c % items_in_row != 0:
+            buf.append("</tr>")
+        buf.append("</table>")
+        buf.append(FOOT_DIR)
+        return '\n'.join(buf)
     else:
-        with open(gift_script_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+        assert False
 
+
+def _read_quiz_script(giftscript_unquoted, cache=None):
+    if cache:
+        lines = cache
+    else:
+        with open(giftscript_unquoted, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
     ast = gift_parse(lines, merge_empty_line=False)
     # print(ast)
-
     return ast
 
 
-def _quiz(giftscript_unquoted):
-    ast = _read_quiz_script(giftscript_unquoted)
+def _quiz(giftscript_unquoted, cache=None):
+    ast = _read_quiz_script(giftscript_unquoted, cache=cache)
     ast = html_escape_node_body_strs(ast)
     answer_table = build_quiz_answer(ast)
     html = build_form_content(ast, shuffle_func=SHUFFLE_FUNC[0], length_hint=answer_table)
@@ -123,17 +140,44 @@ def _quiz(giftscript_unquoted):
 @app.route('/<giftscript>', methods=['GET'])
 def quiz(giftscript):
     giftscript_unquoted = unquote(giftscript)
-    if giftscript_unquoted not in GIFT_SCRIPTS:
-        abort(404)
-    return _quiz(giftscript_unquoted)
+    if GIFT_SCRIPT_INFO.stdin_cache:
+        if giftscript_unquoted == '-':
+            return _quiz(giftscript_unquoted, cache=GIFT_SCRIPT_INFO.stdin_cache)
+    elif GIFT_SCRIPT_INFO.script_file:
+        if giftscript_unquoted == GIFT_SCRIPT_INFO.script_file:
+            return _quiz(giftscript_unquoted)
+    elif GIFT_SCRIPT_INFO.dir:
+        scripts = [f for f in os.listdir(GIFT_SCRIPT_INFO.dir) if f.endswith('.gift')]
+        scripts.sort()
+        if giftscript_unquoted in scripts:
+            return _quiz(path.join(GIFT_SCRIPT_INFO.dir, giftscript_unquoted))
+    abort(404)
+
+
+def _answer_table(giftscript_unquoted, cache=None):
+    ast = _read_quiz_script(giftscript_unquoted, cache=cache)
+    ast = html_escape_node_body_strs(ast)
+    answer_table = build_quiz_answer(ast)
+    return answer_table
 
 
 @app.route('/<giftscript>/submit_answer', methods=['POST'])
 def submit_answer(giftscript):
     giftscript_unquoted = unquote(giftscript)
-    ast = _read_quiz_script(giftscript_unquoted)
-    ast = html_escape_node_body_strs(ast)
-    answer_table = build_quiz_answer(ast)
+    answer_table = None
+    if GIFT_SCRIPT_INFO.stdin_cache:
+        if giftscript_unquoted == '-':
+            answer_table = _answer_table(giftscript_unquoted, cache=GIFT_SCRIPT_INFO.stdin_cache)
+    elif GIFT_SCRIPT_INFO.script_file:
+        if giftscript_unquoted == GIFT_SCRIPT_INFO.script_file:
+            answer_table = _answer_table(giftscript_unquoted)
+    elif GIFT_SCRIPT_INFO.dir:
+        scripts = [f for f in os.listdir(GIFT_SCRIPT_INFO.dir) if f.endswith('.gift')]
+        scripts.sort()
+        if giftscript_unquoted in scripts:
+            answer_table = _answer_table(path.join(GIFT_SCRIPT_INFO.dir, giftscript_unquoted))
+    if answer_table is None:
+        abort(404)
 
     quiz_keys = list(answer_table.keys())
     quiz_keys.sort()
@@ -153,16 +197,14 @@ def submit_answer(giftscript):
 
 def entrypoint(gift_script, shuffle, port=5000):
     if gift_script == '-':
-        GIFT_SCRIPT_DIR[0] = ''
-        GIFT_SCRIPTS.append(gift_script)
+        GIFT_SCRIPT_INFO.stdin_cache = sys.stdin.readlines()
     elif path.isfile(gift_script):
-        GIFT_SCRIPT_DIR[0] = path.split(gift_script)[0]
-        GIFT_SCRIPTS.append(gift_script)
+        GIFT_SCRIPT_INFO.script_file = gift_script
     elif path.isdir(gift_script):
-        GIFT_SCRIPT_DIR[0] = gift_script
-        GIFT_SCRIPTS.extend(f for f in os.listdir(gift_script) if f.endswith('.gift'))
-        GIFT_SCRIPTS.sort()
-        if len(GIFT_SCRIPTS) == 0:
+        GIFT_SCRIPT_INFO.dir = gift_script
+        scripts = [f for f in os.listdir(gift_script) if f.endswith('.gift')]
+        scripts.sort()
+        if not scripts:
             sys.exit("error: no .gift file found in directory: %s" % repr(gift_script))
     else:
         sys.exit("error: no such file/directory found: %s" % repr(gift_script))

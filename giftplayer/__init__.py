@@ -4,7 +4,7 @@ from .answer_scorer import build_quiz_answer, str_normalize, parse_form_content,
 import html
 
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 
 __doc__ = """Render/serve given GIFT script as HTML.
