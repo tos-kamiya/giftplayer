@@ -2,7 +2,8 @@ import os
 import os.path as path
 import random
 import sys
-from urllib.parse import quote, unquote
+from urllib.parse import unquote
+import urllib.parse
 
 from flask import Flask, request, redirect, url_for, abort
 
@@ -10,6 +11,10 @@ from .html import DEFAULT_SEND_BUTTON, DEFAULT_CSS, JQUERY_LOCAL_JS
 from .gift_ast import gift_parse
 from .html_form_builder import html_escape_node_body_strs, build_form_content
 from .answer_scorer import build_quiz_answer, parse_form_content, score_submission
+
+
+def quote(s):
+    return urllib.parse.quote(s, safe='')
 
 
 CSS = """
@@ -91,7 +96,8 @@ def root():
     if GIFT_SCRIPT_INFO.stdin_cache:
         return redirect("/-")
     elif GIFT_SCRIPT_INFO.script_file:
-        return redirect("/" + quote(GIFT_SCRIPT_INFO.script_file))
+        fbody = path.split(GIFT_SCRIPT_INFO.script_file)[1]
+        return redirect("/" + quote(fbody))
     elif GIFT_SCRIPT_INFO.dir:
         scripts = [f for f in os.listdir(GIFT_SCRIPT_INFO.dir) if f.endswith('.gift')]
         scripts.sort()
@@ -139,14 +145,15 @@ def _quiz(giftscript_unquoted, cache=None):
 
 @app.route('/<giftscript>', methods=['GET'])
 def quiz(giftscript):
-    giftscript_unquoted = unquote(giftscript)
     if GIFT_SCRIPT_INFO.stdin_cache:
-        if giftscript_unquoted == '-':
-            return _quiz(giftscript_unquoted, cache=GIFT_SCRIPT_INFO.stdin_cache)
+        if giftscript == '-':
+            return _quiz(giftscript, cache=GIFT_SCRIPT_INFO.stdin_cache)
     elif GIFT_SCRIPT_INFO.script_file:
-        if giftscript_unquoted == GIFT_SCRIPT_INFO.script_file:
-            return _quiz(giftscript_unquoted)
+        fbody = path.split(GIFT_SCRIPT_INFO.script_file)[1]
+        if giftscript == quote(fbody):
+            return _quiz(GIFT_SCRIPT_INFO.script_file)
     elif GIFT_SCRIPT_INFO.dir:
+        giftscript_unquoted = unquote(giftscript)
         scripts = [f for f in os.listdir(GIFT_SCRIPT_INFO.dir) if f.endswith('.gift')]
         scripts.sort()
         if giftscript_unquoted in scripts:
@@ -163,15 +170,16 @@ def _answer_table(giftscript_unquoted, cache=None):
 
 @app.route('/<giftscript>/submit_answer', methods=['POST'])
 def submit_answer(giftscript):
-    giftscript_unquoted = unquote(giftscript)
     answer_table = None
     if GIFT_SCRIPT_INFO.stdin_cache:
-        if giftscript_unquoted == '-':
-            answer_table = _answer_table(giftscript_unquoted, cache=GIFT_SCRIPT_INFO.stdin_cache)
+        if giftscript == '-':
+            answer_table = _answer_table(giftscript, cache=GIFT_SCRIPT_INFO.stdin_cache)
     elif GIFT_SCRIPT_INFO.script_file:
-        if giftscript_unquoted == GIFT_SCRIPT_INFO.script_file:
-            answer_table = _answer_table(giftscript_unquoted)
+        fbody = path.split(GIFT_SCRIPT_INFO.script_file)[1]
+        if giftscript == quote(fbody):
+            answer_table = _answer_table(GIFT_SCRIPT_INFO.script_file)
     elif GIFT_SCRIPT_INFO.dir:
+        giftscript_unquoted = unquote(giftscript)
         scripts = [f for f in os.listdir(GIFT_SCRIPT_INFO.dir) if f.endswith('.gift')]
         scripts.sort()
         if giftscript_unquoted in scripts:
